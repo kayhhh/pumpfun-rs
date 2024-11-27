@@ -340,7 +340,10 @@ impl<'a> PumpFun<'a> {
     ) -> Result<Signature, error::ClientError> {
         // Get accounts and calculate sell amounts
         let ata: Pubkey = get_associated_token_address(&self.payer.pubkey(), mint);
-        let balance = self.rpc.get_token_account_balance(&ata).unwrap();
+        let balance = self
+            .rpc
+            .get_token_account_balance(&ata)
+            .map_err(error::ClientError::SolanaClientError)?;
         let balance_u64: u64 = balance.amount.parse::<u64>().unwrap();
         let _amount = amount_token.unwrap_or(balance_u64);
         let global_account = self.get_global_account()?;
