@@ -23,7 +23,7 @@ use anchor_spl::associated_token::{
 use borsh::BorshDeserialize;
 pub use pumpfun_cpi as cpi;
 use solana_sdk::compute_budget::ComputeBudgetInstruction;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Configuration for priority fee compute unit parameters
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -41,9 +41,9 @@ pub struct PumpFun<'a> {
     /// Keypair used to sign transactions
     pub payer: &'a Keypair,
     /// Anchor client instance
-    pub client: Client<Rc<&'a Keypair>>,
+    pub client: Client<Arc<&'a Keypair>>,
     /// Anchor program instance
-    pub program: Program<Rc<&'a Keypair>>,
+    pub program: Program<Arc<&'a Keypair>>,
 }
 
 impl<'a> PumpFun<'a> {
@@ -73,14 +73,14 @@ impl<'a> PumpFun<'a> {
         });
 
         // Create Anchor Client with optional commitment config
-        let client: Client<Rc<&Keypair>> = if let Some(options) = options {
-            Client::new_with_options(cluster.clone(), Rc::new(payer), options)
+        let client: Client<Arc<&Keypair>> = if let Some(options) = options {
+            Client::new_with_options(cluster.clone(), Arc::new(payer), options)
         } else {
-            Client::new(cluster.clone(), Rc::new(payer))
+            Client::new(cluster.clone(), Arc::new(payer))
         };
 
         // Create Anchor Program instance for Pump.fun
-        let program: Program<Rc<&Keypair>> = client.program(cpi::ID).unwrap();
+        let program: Program<Arc<&Keypair>> = client.program(cpi::ID).unwrap();
 
         // Return configured PumpFun client
         Self {
