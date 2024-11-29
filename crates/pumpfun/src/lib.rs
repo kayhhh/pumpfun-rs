@@ -37,7 +37,7 @@ pub struct PriorityFee {
 /// Main client for interacting with the Pump.fun program
 pub struct PumpFun<'a> {
     /// RPC client for Solana network requests
-    pub rpc: RpcClient,
+    pub rpc: Arc<RpcClient>,
     /// Keypair used to sign transactions
     pub payer: &'a Keypair,
     /// Anchor client instance
@@ -66,11 +66,11 @@ impl<'a> PumpFun<'a> {
         ws: Option<bool>,
     ) -> Self {
         // Create Solana RPC Client with either WS or HTTP endpoint
-        let rpc: RpcClient = RpcClient::new(if ws.unwrap_or(false) {
+        let rpc = Arc::new(RpcClient::new(if ws.unwrap_or(false) {
             cluster.ws_url()
         } else {
             cluster.url()
-        });
+        }));
 
         // Create Anchor Client with optional commitment config
         let client: Client<Arc<&Keypair>> = if let Some(options) = options {
