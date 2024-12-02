@@ -85,9 +85,9 @@ impl BondingCurveAccount {
     /// # Returns
     /// * `Ok(u64)` - Amount of tokens that would be received
     /// * `Err(&str)` - Error message if curve is complete
-    pub fn get_buy_price(&self, amount: u64) -> Result<u64, &'static str> {
+    pub fn get_buy_price(&self, amount: u64) -> anyhow::Result<u64> {
         if self.complete {
-            return Err("Curve is complete");
+            return Err(anyhow::anyhow!("Curve is complete"));
         }
 
         if amount == 0 {
@@ -124,9 +124,9 @@ impl BondingCurveAccount {
     /// # Returns
     /// * `Ok(u64)` - Amount of SOL that would be received after fees
     /// * `Err(&str)` - Error message if curve is complete
-    pub fn get_sell_price(&self, amount: u64, fee_basis_points: u64) -> Result<u64, &'static str> {
+    pub fn get_sell_price(&self, amount: u64, fee_basis_points: u64) -> anyhow::Result<u64> {
         if self.complete {
-            return Err("Curve is complete");
+            return Err(anyhow::anyhow!("Curve is complete"));
         }
 
         if amount == 0 {

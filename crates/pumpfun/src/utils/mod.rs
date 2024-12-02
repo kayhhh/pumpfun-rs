@@ -98,7 +98,7 @@ pub struct CreateTokenMetadata {
 /// ```
 pub async fn create_token_metadata(
     metadata: CreateTokenMetadata,
-) -> Result<TokenMetadataResponse, Box<dyn std::error::Error>> {
+) -> anyhow::Result<TokenMetadataResponse> {
     let boundary = "------------------------f4d9c2e8b7a5310f";
     let mut body = Vec::new();
 

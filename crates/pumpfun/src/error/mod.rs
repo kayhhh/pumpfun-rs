@@ -19,56 +19,38 @@
 //! - `RateLimitExceeded`: Rate limit exceeded.
 
 use anchor_client::solana_client;
+use thiserror::Error;
 
-#[derive(Debug)]
+#[derive(Error, Debug)]
 pub enum ClientError {
     /// Bonding curve account was not found
+    #[error("bonding curve not found")]
     BondingCurveNotFound,
     /// Error related to bonding curve operations
-    BondingCurveError(&'static str),
+    #[error("bonding curve error: {0}")]
+    BondingCurveError(anyhow::Error),
     /// Error deserializing data using Borsh
+    #[error("borsh serialization error: {0}")]
     BorshError(std::io::Error),
     /// Error from Solana RPC client
-    SolanaClientError(solana_client::client_error::ClientError),
+    #[error("solana client error: {0}")]
+    SolanaClientError(Box<solana_client::client_error::ClientError>),
     /// Error uploading metadata
-    UploadMetadataError(Box<dyn std::error::Error>),
+    #[error("metadata upload error: {0}")]
+    UploadMetadataError(anyhow::Error),
     /// Error from Anchor client
+    #[error("anchor client error: {0}")]
     AnchorClientError(anchor_client::ClientError),
     /// Invalid input parameters
-    InvalidInput(&'static str),
+    #[error("invalid input: {0}")]
+    InvalidInput(anyhow::Error),
     /// Insufficient funds for transaction
+    #[error("insufficient funds for transaction")]
     InsufficientFunds,
     /// Transaction simulation failed
+    #[error("transaction simulation failed: {0}")]
     SimulationError(String),
     /// Rate limit exceeded
+    #[error("rate limit exceeded")]
     RateLimitExceeded,
-}
-
-impl std::fmt::Display for ClientError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::BondingCurveNotFound => write!(f, "Bonding curve not found"),
-            Self::BondingCurveError(msg) => write!(f, "Bonding curve error: {}", msg),
-            Self::BorshError(err) => write!(f, "Borsh serialization error: {}", err),
-            Self::SolanaClientError(err) => write!(f, "Solana client error: {}", err),
-            Self::UploadMetadataError(err) => write!(f, "Metadata upload error: {}", err),
-            Self::AnchorClientError(err) => write!(f, "Anchor client error: {}", err),
-            Self::InvalidInput(msg) => write!(f, "Invalid input: {}", msg),
-            Self::InsufficientFunds => write!(f, "Insufficient funds for transaction"),
-            Self::SimulationError(msg) => write!(f, "Transaction simulation failed: {}", msg),
-            Self::RateLimitExceeded => write!(f, "Rate limit exceeded"),
-        }
-    }
-}
-
-impl std::error::Error for ClientError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::BorshError(err) => Some(err),
-            Self::SolanaClientError(err) => Some(err),
-            Self::UploadMetadataError(err) => Some(err.as_ref()),
-            Self::AnchorClientError(err) => Some(err),
-            _ => None,
-        }
-    }
 }

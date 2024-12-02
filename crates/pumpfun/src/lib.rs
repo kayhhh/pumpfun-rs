@@ -343,7 +343,7 @@ impl<'a> PumpFun<'a> {
         let balance = self
             .rpc
             .get_token_account_balance(&ata)
-            .map_err(error::ClientError::SolanaClientError)?;
+            .map_err(|e| error::ClientError::SolanaClientError(Box::new(e)))?;
         let balance_u64: u64 = balance.amount.parse::<u64>().unwrap();
         let _amount = amount_token.unwrap_or(balance_u64);
         let global_account = self.get_global_account()?;
@@ -462,7 +462,7 @@ impl<'a> PumpFun<'a> {
         let account = self
             .rpc
             .get_account(&global)
-            .map_err(error::ClientError::SolanaClientError)?;
+            .map_err(|e| error::ClientError::SolanaClientError(Box::new(e)))?;
 
         accounts::GlobalAccount::try_from_slice(&account.data)
             .map_err(error::ClientError::BorshError)
@@ -487,7 +487,7 @@ impl<'a> PumpFun<'a> {
         let account = self
             .rpc
             .get_account(&bonding_curve_pda)
-            .map_err(error::ClientError::SolanaClientError)?;
+            .map_err(|e| error::ClientError::SolanaClientError(Box::new(e)))?;
 
         accounts::BondingCurveAccount::try_from_slice(&account.data)
             .map_err(error::ClientError::BorshError)
