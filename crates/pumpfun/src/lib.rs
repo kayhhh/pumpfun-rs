@@ -22,7 +22,7 @@ use anchor_spl::associated_token::{
 };
 use borsh::BorshDeserialize;
 pub use pumpfun_cpi as cpi;
-use solana_sdk::compute_budget::ComputeBudgetInstruction;
+use solana_sdk::{compute_budget::ComputeBudgetInstruction, transaction::Transaction};
 use std::sync::Arc;
 
 /// Configuration for priority fee compute unit parameters
@@ -260,7 +260,7 @@ impl<'a> PumpFun<'a> {
         amount_sol: u64,
         slippage_basis_points: Option<u64>,
         priority_fee: Option<PriorityFee>,
-    ) -> Result<Signature, error::ClientError> {
+    ) -> Result<Transaction, error::ClientError> {
         // Get accounts and calculate buy amounts
         let global_account = self.get_global_account()?;
         let bonding_curve_account = self.get_bonding_curve_account(mint)?;
@@ -310,13 +310,19 @@ impl<'a> PumpFun<'a> {
         // Add signer
         request = request.signer(&self.payer);
 
-        // Send transaction
-        let signature: Signature = request
-            .send()
+        // Build transaction
+        let tx = request
+            .signed_transaction()
             .await
             .map_err(error::ClientError::AnchorClientError)?;
 
-        Ok(signature)
+        // Send transaction
+        // let signature: Signature = request
+        //     .send()
+        //     .await
+        //     .map_err(error::ClientError::AnchorClientError)?;
+
+        Ok(tx)
     }
 
     /// Sells tokens back to the bonding curve in exchange for SOL
@@ -337,7 +343,7 @@ impl<'a> PumpFun<'a> {
         amount_token: Option<u64>,
         slippage_basis_points: Option<u64>,
         priority_fee: Option<PriorityFee>,
-    ) -> Result<Signature, error::ClientError> {
+    ) -> Result<Transaction, error::ClientError> {
         // Get accounts and calculate sell amounts
         let ata: Pubkey = get_associated_token_address(&self.payer.pubkey(), mint);
         let balance = self
@@ -385,13 +391,19 @@ impl<'a> PumpFun<'a> {
         // Add signer
         request = request.signer(&self.payer);
 
-        // Send transaction
-        let signature: Signature = request
-            .send()
+        // Build transaction
+        let tx = request
+            .signed_transaction()
             .await
             .map_err(error::ClientError::AnchorClientError)?;
 
-        Ok(signature)
+        // Send transaction
+        // let signature: Signature = request
+        //     .send()
+        //     .await
+        //     .map_err(error::ClientError::AnchorClientError)?;
+
+        Ok(tx)
     }
 
     /// Gets the Program Derived Address (PDA) for the global state account
