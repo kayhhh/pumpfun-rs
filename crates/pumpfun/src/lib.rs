@@ -14,7 +14,7 @@ use anchor_client::{
         signature::{Keypair, Signature},
         signer::Signer,
     },
-    Client, Cluster, Program,
+    Client, Cluster, Program, RequestBuilder,
 };
 use anchor_spl::associated_token::{
     get_associated_token_address,
@@ -22,7 +22,7 @@ use anchor_spl::associated_token::{
 };
 use borsh::BorshDeserialize;
 pub use pumpfun_cpi as cpi;
-use solana_sdk::{compute_budget::ComputeBudgetInstruction, transaction::Transaction};
+use solana_sdk::compute_budget::ComputeBudgetInstruction;
 use std::sync::Arc;
 
 /// Configuration for priority fee compute unit parameters
@@ -260,7 +260,7 @@ impl<'a> PumpFun<'a> {
         amount_sol: u64,
         slippage_basis_points: Option<u64>,
         priority_fee: Option<PriorityFee>,
-    ) -> Result<Transaction, error::ClientError> {
+    ) -> Result<RequestBuilder<Arc<&Keypair>>, error::ClientError> {
         // Get accounts and calculate buy amounts
         let global_account = self.get_global_account()?;
         let bonding_curve_account = self.get_bonding_curve_account(mint)?;
@@ -310,19 +310,7 @@ impl<'a> PumpFun<'a> {
         // Add signer
         request = request.signer(&self.payer);
 
-        // Build transaction
-        let tx = request
-            .signed_transaction()
-            .await
-            .map_err(error::ClientError::AnchorClientError)?;
-
-        // Send transaction
-        // let signature: Signature = request
-        //     .send()
-        //     .await
-        //     .map_err(error::ClientError::AnchorClientError)?;
-
-        Ok(tx)
+        Ok(request)
     }
 
     /// Sells tokens back to the bonding curve in exchange for SOL
@@ -343,7 +331,7 @@ impl<'a> PumpFun<'a> {
         amount_token: Option<u64>,
         slippage_basis_points: Option<u64>,
         priority_fee: Option<PriorityFee>,
-    ) -> Result<Transaction, error::ClientError> {
+    ) -> Result<RequestBuilder<Arc<&Keypair>>, error::ClientError> {
         // Get accounts and calculate sell amounts
         let ata: Pubkey = get_associated_token_address(&self.payer.pubkey(), mint);
         let balance = self
@@ -391,19 +379,7 @@ impl<'a> PumpFun<'a> {
         // Add signer
         request = request.signer(&self.payer);
 
-        // Build transaction
-        let tx = request
-            .signed_transaction()
-            .await
-            .map_err(error::ClientError::AnchorClientError)?;
-
-        // Send transaction
-        // let signature: Signature = request
-        //     .send()
-        //     .await
-        //     .map_err(error::ClientError::AnchorClientError)?;
-
-        Ok(tx)
+        Ok(request)
     }
 
     /// Gets the Program Derived Address (PDA) for the global state account
